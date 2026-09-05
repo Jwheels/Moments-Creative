@@ -2,7 +2,7 @@
 
 Landing page for [momentscreative.ca](https://momentscreative.ca). Static site,
 no build step, deployed on Cloudflare Pages, with one Pages Function that emails
-inquiry form submissions to `mary@momentscreative.ca`.
+inquiry form submissions to `hello@momentscreative.ca`.
 
 ```
 index.html              The landing page (markup + copy only)
@@ -103,7 +103,7 @@ curl -sI https://www.momentscreative.ca | head -3   # expect 301
 
 ## Part 3 — Make the inquiry form deliver email
 
-The form posts JSON to `/api/inquiry`. That Function emails Mary through
+The form posts JSON to `/api/inquiry`. That Function emails the inquiry inbox through
 [Resend](https://resend.com) — a transactional email API. **Until you finish this
 section the form will show visitors a polite error** pointing them at
 `hello@momentscreative.ca`, rather than failing silently.
@@ -113,7 +113,7 @@ section the form will show visitors a polite error** pointing them at
 Cloudflare's serverless runtime can't open raw SMTP connections, so a Function
 can't talk to Gmail's servers directly. It has to call an email API over HTTPS.
 Resend's free tier is 3,000 emails/month — an inquiry form will never approach
-that. Mary's inbox stays exactly where it is; Resend only does the sending.
+that. The Google Workspace inbox stays exactly where it is; Resend only does the sending.
 
 ### What this depends on
 
@@ -136,7 +136,7 @@ that. Mary's inbox stays exactly where it is; Resend only does the sending.
    > a mail record breaks it. This is the single most common thing to get wrong.
 
    These records are additive and scoped to a `send.` subdomain — they do **not**
-   disturb the existing Google Workspace MX records that deliver Mary's actual
+   disturb the existing Google Workspace MX records that deliver your actual
    mail. Leave those alone.
 
 4. **Verify.** Back in Resend, hit **Verify**. Usually under 10 minutes.
@@ -165,12 +165,12 @@ defaults baked into `functions/api/inquiry.js`:
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
-| `INQUIRY_TO` | `mary@momentscreative.ca` | Where inquiries land |
+| `INQUIRY_TO` | `hello@momentscreative.ca` | Where inquiries land |
 | `INQUIRY_FROM` | `Moments Creative <inquiries@momentscreative.ca>` | Sender; must be on the Resend-verified domain |
 
 `INQUIRY_FROM` doesn't need to be a real mailbox — nobody sends to it. Replies go
 to whoever filled in the form, because the Function sets `reply_to` to their
-address. Mary can just hit reply.
+address. Just hit reply.
 
 ### What the endpoint does
 

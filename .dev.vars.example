@@ -3,5 +3,5 @@
 RESEND_API_KEY=re_your_key_here
 
 # Optional overrides
-# INQUIRY_TO=mary@momentscreative.ca
+# INQUIRY_TO=hello@momentscreative.ca
 # INQUIRY_FROM=Moments Creative <inquiries@momentscreative.ca>

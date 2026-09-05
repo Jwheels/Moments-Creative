@@ -1,6 +1,6 @@
 /* Moments Creative — inquiry form submission.
    Posts to the Cloudflare Pages Function at /api/inquiry, which emails
-   the submission to mary@momentscreative.ca. */
+   the submission to hello@momentscreative.ca. */
 
 (function () {
   'use strict';

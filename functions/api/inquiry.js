@@ -2,18 +2,18 @@
  * POST /api/inquiry
  *
  * Cloudflare Pages Function. Receives the landing page inquiry form and emails
- * it to Mary via Resend (https://resend.com).
+ * it to the inquiry inbox via Resend (https://resend.com).
  *
  * Required environment variable (Pages → Settings → Variables and Secrets):
  *   RESEND_API_KEY   Resend API key. Store as a SECRET, not plaintext.
  *
  * Optional overrides (plaintext vars are fine):
- *   INQUIRY_TO       Recipient.  Default: mary@momentscreative.ca
+ *   INQUIRY_TO       Recipient.  Default: hello@momentscreative.ca
  *   INQUIRY_FROM     Sender.     Default: Moments Creative <inquiries@momentscreative.ca>
  *                    Must be on a domain verified in Resend.
  */
 
-const DEFAULT_TO = 'mary@momentscreative.ca';
+const DEFAULT_TO = 'hello@momentscreative.ca';
 const DEFAULT_FROM = 'Moments Creative <inquiries@momentscreative.ca>';
 
 // Length caps, so a bot can't post a novel through the form.
