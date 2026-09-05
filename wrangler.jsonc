@@ -15,6 +15,18 @@
     "directory": "./public/",
     "binding": "ASSETS"
   },
+  // RESEND_API_KEY lives in the account-level Secrets Store, not as a plain
+  // Worker secret, so it has to be bound explicitly here — a Secrets Store
+  // secret is NOT visible to a Worker until it is. store_id is an identifier,
+  // not a credential; the secret's value never leaves Cloudflare.
+  "secrets_store_secrets": [
+    {
+      "binding": "RESEND_API_KEY",
+      "store_id": "d803088bc84e4cb2b4260df4f78e1fa0",
+      "secret_name": "RESEND_API_KEY"
+    }
+  ],
+
   "observability": {
     "enabled": true
   }

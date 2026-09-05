@@ -4,8 +4,11 @@
  * Cloudflare Pages Function. Receives the landing page inquiry form and emails
  * it to the inquiry inbox via Resend (https://resend.com).
  *
- * Required environment variable (Pages → Settings → Variables and Secrets):
- *   RESEND_API_KEY   Resend API key. Store as a SECRET, not plaintext.
+ * Required secret:
+ *   RESEND_API_KEY   Resend API key. Either a plain Worker secret (a string)
+ *                    or a Secrets Store binding (read via .get()). This project
+ *                    uses the Secrets Store — see secrets_store_secrets in
+ *                    wrangler.jsonc. Both shapes are handled.
  *
  * Optional overrides (plaintext vars are fine):
  *   INQUIRY_TO       Recipient.  Default: hello@momentscreative.ca
@@ -28,6 +31,28 @@ const LIMITS = {
 
 const GENERIC_ERROR =
   'Something went wrong sending that. Please email hello@momentscreative.ca directly.';
+
+/**
+ * Resolve the Resend API key from whichever shape the binding takes.
+ *
+ * A plain Worker secret arrives as a string. A Secrets Store binding arrives as
+ * an object whose value must be read asynchronously with .get(). Supporting
+ * both means the key can be moved between the two without a code change.
+ */
+async function resolveApiKey(env) {
+  const binding = env.RESEND_API_KEY;
+  if (!binding) return { key: '', source: 'none' };
+  if (typeof binding === 'string') return { key: binding, source: 'worker-secret' };
+  if (typeof binding.get === 'function') {
+    try {
+      return { key: (await binding.get()) || '', source: 'secrets-store' };
+    } catch (err) {
+      console.error('Secrets Store read failed:', err);
+      return { key: '', source: 'secrets-store-error' };
+    }
+  }
+  return { key: '', source: 'unrecognised-binding' };
+}
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -128,14 +153,17 @@ function buildHtml(fields) {
  */
 export async function onRequestGet(context) {
   const { env } = context;
-  const key = env.RESEND_API_KEY;
+  const { key, source } = await resolveApiKey(env);
   return json({
     endpoint: 'ok',
     resendKeyConfigured: Boolean(key),
+    // Where the key came from: "secrets-store", "worker-secret", or "none".
+    // Confirms the binding took effect without revealing anything.
+    resendKeySource: source,
     // Resend keys start with "re_" — catches pasting the wrong value entirely.
-    resendKeyLooksValid: typeof key === 'string' && key.startsWith('re_'),
+    resendKeyLooksValid: key.startsWith('re_'),
     // Catches a stray newline or space picked up while copying.
-    resendKeyHasWhitespace: typeof key === 'string' && key.trim() !== key,
+    resendKeyHasWhitespace: key.trim() !== key,
     sendsTo: env.INQUIRY_TO || DEFAULT_TO,
     sendsFrom: env.INQUIRY_FROM || DEFAULT_FROM,
   });
@@ -186,10 +214,13 @@ export async function onRequestPost(context) {
   }
 
   // --- Config ------------------------------------------------------------
-  const apiKey = env.RESEND_API_KEY;
+  const { key: apiKey, source: keySource } = await resolveApiKey(env);
   if (!apiKey) {
     // Not the visitor's fault; make it loud in the logs, gentle on the page.
-    console.error('RESEND_API_KEY is not set — inquiry not delivered:', fields.email);
+    console.error(
+      `RESEND_API_KEY unavailable (source: ${keySource}) — inquiry not delivered:`,
+      fields.email
+    );
     return json({ error: GENERIC_ERROR, code: 'no_api_key' }, 500);
   }
 

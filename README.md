@@ -105,7 +105,8 @@ that. The Google Workspace inbox stays exactly where it is; Resend only does the
 
 - A Resend account (free).
 - **Three DNS records** on `momentscreative.ca`, added in Cloudflare.
-- **One secret** stored on the Worker: `RESEND_API_KEY`.
+- **One secret**, `RESEND_API_KEY`, in the Secrets Store and bound in
+  `wrangler.jsonc`.
 
 ### Steps
 
@@ -130,15 +131,24 @@ that. The Google Workspace inbox stays exactly where it is; Resend only does the
 5. **Create an API key.** Resend → **API Keys** → **Create**. Sending permission
    is enough. Copy it now — it's shown once.
 
-6. **Store it in Cloudflare.** Worker → **Settings** → **Variables and
-   Secrets** → **Add**:
-   - Type: **Secret** (encrypts it and hides the value from the UI)
-   - Name: `RESEND_API_KEY`
-   - Value: the key
+6. **Store the key.** It currently lives in the account-level **Secrets Store**
+   as `RESEND_API_KEY`, bound to this Worker by the `secrets_store_secrets`
+   block in `wrangler.jsonc`.
 
-7. **Redeploy.** Secrets are bound at deploy time, so the running deployment
-   won't see a newly added one. Any push triggers a fresh build; `npx wrangler
-   deploy` works too.
+   > A Secrets Store secret is **not** visible to a Worker just because it
+   > exists — the binding is what makes it reachable. Without it, `env` has no
+   > `RESEND_API_KEY` at all and the form fails with `code: "no_api_key"`. If you
+   > ever move the secret to a different store, update `store_id` to match.
+
+   To rotate the value: **Secrets Store** → `RESEND_API_KEY` → **Rotate**. No
+   code change and no redeploy — the Worker reads it at request time.
+
+   A plain Worker secret works too, if you'd rather (`npx wrangler secret put
+   RESEND_API_KEY`). The code accepts both shapes, so nothing needs changing
+   either way.
+
+7. **Redeploy** if you changed the binding. Any push triggers a build; `npx
+   wrangler deploy` works too. Rotating the value alone needs no redeploy.
 
 8. **Send yourself a test** through the live form and confirm it lands.
 
@@ -187,8 +197,10 @@ configuration check:
 
 - **404 / the landing page** — the Worker script isn't running. Check that
   `wrangler.jsonc` shipped and that the build succeeded.
-- **`resendKeyConfigured: false`** — the secret isn't bound. Add it, then
-  redeploy; env vars are read at deploy time.
+- **`resendKeyConfigured: false`** — the key isn't reaching the Worker. Check
+  `resendKeySource` in the same response: `none` means nothing is bound (check
+  the `secrets_store_secrets` block and that `store_id` matches the store),
+  `secrets-store-error` means the binding exists but the read failed.
 - **`resendKeyLooksValid: false`** — that isn't a Resend key (they start `re_`).
 - **`resendKeyHasWhitespace: true`** — a newline came along with the paste.
 
