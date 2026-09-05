@@ -1,0 +1,21 @@
+{
+  // Cloudflare Worker with static assets.
+  //
+  // Requests are matched against public/ first; anything with no matching file
+  // falls through to src/index.js. That is how /api/inquiry reaches the Worker
+  // while every real page and asset is served directly from the edge.
+  //
+  // This project previously used the Pages "functions/" convention, which is a
+  // Pages-only feature — Workers ignored it and served the folder as static
+  // files, so the endpoint 404'd. See README for the full story.
+  "name": "moments-creative",
+  "compatibility_date": "2026-09-05",
+  "main": "./src/index.js",
+  "assets": {
+    "directory": "./public/",
+    "binding": "ASSETS"
+  },
+  "observability": {
+    "enabled": true
+  }
+}

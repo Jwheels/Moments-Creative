@@ -1,0 +1,13 @@
+{
+  "name": "moments-creative",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Landing page for momentscreative.ca",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.129.0"
+  }
+}

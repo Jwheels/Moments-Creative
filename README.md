@@ -1,21 +1,35 @@
 # Moments Creative
 
-Landing page for [momentscreative.ca](https://momentscreative.ca). Static site,
-no build step, deployed on Cloudflare Pages, with one Pages Function that emails
-inquiry form submissions to `hello@momentscreative.ca`.
+Landing page for [momentscreative.ca](https://momentscreative.ca). A Cloudflare
+**Worker with static assets**: the page is plain HTML/CSS/JS served from the
+edge, plus one small Worker script that emails inquiry form submissions to
+`hello@momentscreative.ca`.
 
 ```
-index.html              The landing page (markup + copy only)
-css/styles.css          All styling — the Tide & Table design system
-js/main.js              Inquiry form submission handling
-functions/api/inquiry.js  Serverless endpoint: validates + emails submissions
-_headers                Security headers applied by Cloudflare Pages
-.dev.vars.example       Template for local secrets (copy to .dev.vars)
+public/                 Everything served to visitors
+  index.html              The landing page (markup + copy only)
+  css/styles.css          All styling — the Tide & Table design system
+  js/main.js              Inquiry form submission handling
+  _headers                Security headers
+src/
+  index.js                Worker entry point — routes /api/inquiry
+  inquiry.js              Validates submissions and sends the email
+wrangler.jsonc          Cloudflare configuration
 ```
 
-Cloudflare Pages turns anything under `functions/` into a route automatically, so
-`functions/api/inquiry.js` is served at `/api/inquiry`. There is nothing to build
-and no dependencies to install — the folder is the site.
+Requests are matched against `public/` first. Anything with no matching file
+falls through to `src/index.js`, which is how `/api/inquiry` reaches the Worker
+while every real page and asset is served straight from the edge. Nothing
+outside `public/` is ever served, so the Worker source, config, and this README
+stay private.
+
+> **A note on Pages vs Workers.** This started out using Cloudflare Pages'
+> `functions/` convention, where a file at `functions/api/inquiry.js` becomes an
+> endpoint automatically. That is a **Pages-only feature**. The project was
+> deployed as a Worker, which ignores `functions/` and uploaded it as a plain
+> static file — so `/api/inquiry` returned 404 and the form silently failed.
+> Cloudflare now recommends Workers over Pages for new projects, so the fix was
+> to add a real Worker entry point rather than move back to Pages.
 
 ## Design system
 
@@ -37,71 +51,43 @@ the look, so keep it.
 
 ---
 
-## Part 1 — Deploy to Cloudflare Pages
+## Deploying
 
-Two ways in. **Git is the better one** — every push redeploys automatically.
+The GitHub repo is connected to Cloudflare, so **every push to the production
+branch deploys automatically**. There is no manual upload step and no zip to
+drag anywhere. Push, wait a minute, done.
 
-### Option A: connect the Git repo (recommended)
+Watch a build in Cloudflare → **Workers & Pages** → **moments-creative** →
+**Deployments**. A failed build leaves the previous deployment serving, so a bad
+push degrades to "nothing changed" rather than downtime.
 
-1. Push this repo to GitHub if it isn't there already.
-2. Cloudflare dashboard → **Workers & Pages** → **Create** → **Pages** →
-   **Connect to Git**.
-3. Pick this repository. On the build settings screen:
-   - **Framework preset:** `None`
-   - **Build command:** *leave empty*
-   - **Build output directory:** `/`
-4. **Save and Deploy.** First build takes about a minute.
-
-You'll get a URL like `moments-creative.pages.dev`. That's the live site — the
-custom domain comes next.
-
-### Option B: drag and drop
-
-Workers & Pages → **Create** → **Pages** → **Upload assets**, then drag the whole
-folder in (the `functions` folder included — that's what makes the form work).
-Fine for a one-off, but you'll re-upload by hand for every change.
-
----
-
-## Part 2 — Connect momentscreative.ca
-
-Because the domain is already in the same Cloudflare account, this is mostly
-confirmation clicks — you won't touch a registrar or edit nameservers.
-
-1. Open your Pages project → **Custom domains** tab → **Set up a custom domain**.
-2. Enter `momentscreative.ca`. Cloudflare recognises the domain as yours, shows
-   you the DNS record it's about to create, and asks you to confirm. Accept it.
-   It adds a `CNAME` at the root (flattened automatically — this is why it works
-   at the apex without an A record).
-3. Repeat for `www.momentscreative.ca`. Add both, always — visitors type both.
-4. Status goes **Pending → Active**, usually within a minute or two. The SSL
-   certificate is issued automatically; give it up to ~15 minutes before worrying.
-
-### Make one of them canonical
-
-With both hostnames live, pick one as the real address so you don't split SEO.
-The site's `<link rel="canonical">` currently points at the apex
-(`https://momentscreative.ca/`), so redirect `www` to it:
-
-- DNS tab → confirm `www` exists (the step above created it).
-- **Rules** → **Redirect Rules** → **Create rule**:
-  - **If** — Hostname equals `www.momentscreative.ca`
-  - **Then** — Dynamic redirect, status **301**, expression
-    `concat("https://momentscreative.ca", http.request.uri.path)`
-
-If you'd rather `www` be the canonical one, flip the rule and update the
-`canonical` and `og:url` tags in `index.html` to match.
-
-### Check it worked
+To deploy by hand from a checkout instead:
 
 ```sh
-curl -sI https://momentscreative.ca | head -3
-curl -sI https://www.momentscreative.ca | head -3   # expect 301
+npx wrangler deploy
 ```
 
----
+### Connecting momentscreative.ca
 
-## Part 3 — Make the inquiry form deliver email
+Already done, but for reference — since the domain is in the same Cloudflare
+account this is confirmation clicks, not registrar or nameserver edits:
+
+1. Worker → **Settings** → **Domains & Routes** → **Add** → **Custom domain**
+2. Enter `momentscreative.ca`. Cloudflare recognises the domain, shows the DNS
+   record it will create, and asks you to confirm.
+3. Repeat for `www.momentscreative.ca`. Add both — visitors type both.
+4. SSL is issued automatically; allow up to ~15 minutes.
+
+To keep `www` from splitting your SEO, redirect it to the apex. **Rules** →
+**Redirect Rules** → **Create**: if hostname equals `www.momentscreative.ca`,
+then dynamic redirect, **301**, expression
+`concat("https://momentscreative.ca", http.request.uri.path)`.
+
+The site's `<link rel="canonical">` points at the apex. If you'd rather `www` be
+canonical, flip the rule and update the `canonical` and `og:url` tags in
+`public/index.html` to match.
+
+## The inquiry form and Resend
 
 The form posts JSON to `/api/inquiry`. That Function emails the inquiry inbox through
 [Resend](https://resend.com) — a transactional email API. **Until you finish this
@@ -119,7 +105,7 @@ that. The Google Workspace inbox stays exactly where it is; Resend only does the
 
 - A Resend account (free).
 - **Three DNS records** on `momentscreative.ca`, added in Cloudflare.
-- **One secret** stored in the Pages project: `RESEND_API_KEY`.
+- **One secret** stored on the Worker: `RESEND_API_KEY`.
 
 ### Steps
 
@@ -144,24 +130,22 @@ that. The Google Workspace inbox stays exactly where it is; Resend only does the
 5. **Create an API key.** Resend → **API Keys** → **Create**. Sending permission
    is enough. Copy it now — it's shown once.
 
-6. **Store it in Cloudflare.** Pages project → **Settings** →
-   **Variables and secrets** → **Add**:
-   - Type: **Secret** (not plaintext — this encrypts it and hides it from the UI)
+6. **Store it in Cloudflare.** Worker → **Settings** → **Variables and
+   Secrets** → **Add**:
+   - Type: **Secret** (encrypts it and hides the value from the UI)
    - Name: `RESEND_API_KEY`
    - Value: the key
-   - Add it to **Production**, and to **Preview** too if you want preview
-     deployments to send.
 
-7. **Redeploy.** Deployments → **Retry deployment** on the latest one. Environment
-   variables are read at deploy time, so the existing deployment won't see the new
-   secret until you do this.
+7. **Redeploy.** Secrets are bound at deploy time, so the running deployment
+   won't see a newly added one. Any push triggers a fresh build; `npx wrangler
+   deploy` works too.
 
 8. **Send yourself a test** through the live form and confirm it lands.
 
 ### Optional overrides
 
 Both are plain variables, not secrets. Set them only if you want to change the
-defaults baked into `functions/api/inquiry.js`:
+defaults baked into `src/inquiry.js`:
 
 | Variable | Default | Purpose |
 | --- | --- | --- |
@@ -201,8 +185,8 @@ configuration check:
 }
 ```
 
-- **404 / the landing page** — the Function isn't deployed. The `functions/`
-  folder didn't ship, or the project is a Worker rather than Pages.
+- **404 / the landing page** — the Worker script isn't running. Check that
+  `wrangler.jsonc` shipped and that the build succeeded.
 - **`resendKeyConfigured: false`** — the secret isn't bound. Add it, then
   redeploy; env vars are read at deploy time.
 - **`resendKeyLooksValid: false`** — that isn't a Resend key (they start `re_`).
@@ -221,15 +205,14 @@ The endpoint reports whether a key exists, never its value. Delete
 ## Running it locally
 
 ```sh
+npm install
 cp .dev.vars.example .dev.vars    # then paste a real key in, if testing email
-npx wrangler pages dev .
+npx wrangler dev
 ```
 
-Serves the site with Functions on `http://localhost:8788`. `.dev.vars` is
-gitignored — don't commit a key.
-
-For a quick look at just the page (no form backend), `python3 -m http.server` is
-enough; the form will show its fallback error, which is expected.
+This runs the real Cloudflare runtime locally on `http://localhost:8787` —
+static assets, routing, `_headers`, and the Worker, exactly as in production.
+`.dev.vars` is gitignored; don't commit a key.
 
 ---
 
@@ -238,7 +221,7 @@ enough; the form will show its fallback error, which is expected.
 ### The logo
 
 The wordmark is a text placeholder in two places — the nav and the footer, both
-marked `<!-- LOGO SWAP -->` in `index.html`:
+marked `<!-- LOGO SWAP -->` in `public/index.html`:
 
 ```html
 <div class="word">Moments Creative</div>
@@ -258,7 +241,7 @@ worth asking the designer for — it stays sharp on every screen.
 
 ### Work example photos and video
 
-Every card in both strips is the same shape, marked `<!-- MEDIA SWAP -->`:
+Every card in both strips is the same shape, marked `<!-- MEDIA SWAP -->` in `public/index.html`:
 
 ```html
 <div class="work-card wc1"><div class="fill"></div><div class="cap">Reel · Local boutique</div></div>
@@ -294,8 +277,8 @@ Notes:
 
 ### Adding more pages
 
-Copy `index.html`, strip the sections you don't need, keep the `<head>` block and
-the nav/footer. Everything already points at absolute paths (`/css/styles.css`,
+Copy `public/index.html`, strip the sections you don't need, keep the `<head>`
+block and the nav/footer. Everything already points at absolute paths (`/css/styles.css`,
 `/js/main.js`), so a page works from any depth. If the duplicated nav and footer
 start to get annoying — around the fourth page — that's the moment to introduce a
 static site generator, not before.
@@ -305,7 +288,9 @@ static site generator, not before.
 - No favicon yet — browsers will request `/favicon.ico` and get a 404. Harmless,
   but worth adding with the logo.
 - No `og:image`, so link previews on Facebook/LinkedIn show no picture. Add a
-  1200×630 image and uncomment the tag in `index.html`.
+  1200×630 image and uncomment the tag in `public/index.html`.
+- `onRequestGet` in `src/inquiry.js` is a debugging aid. Delete it once you're
+  confident the form is stable.
 - The form has a honeypot but no CAPTCHA. If spam ever gets through, Cloudflare
   Turnstile is the natural next step — free, and it drops into the same Function.
 - Submissions exist only as email. If losing one would hurt, add a Cloudflare KV
