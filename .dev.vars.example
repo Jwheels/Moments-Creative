@@ -1,0 +1,7 @@
+# Copy to .dev.vars for local testing with `npx wrangler pages dev .`
+# .dev.vars is gitignored — never commit a real key.
+RESEND_API_KEY=re_your_key_here
+
+# Optional overrides
+# INQUIRY_TO=mary@momentscreative.ca
+# INQUIRY_FROM=Moments Creative <inquiries@momentscreative.ca>

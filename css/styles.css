@@ -1,0 +1,132 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: #F7F2E7; color: #2B2622;
+  font-family: 'Work Sans', sans-serif;
+  line-height: 1.6;
+}
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+a { color: inherit; }
+h1, h2, h3 { font-family: 'Newsreader', serif; font-weight: 500; }
+
+/* ---- Nav ---- */
+nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 28px 32px; max-width: 1080px; margin: 0 auto;
+}
+nav .word { font-family: 'Newsreader', serif; font-style: italic; font-size: 22px; }
+nav .navlink {
+  text-decoration: none; font-size: 14px; font-weight: 600;
+  background: #0F5257; color: #F7F2E7; padding: 10px 20px; border-radius: 2px;
+}
+
+/* ---- Hero ---- */
+.hero { text-align: center; padding: 50px 32px 30px; max-width: 760px; margin: 0 auto; }
+.hero h1 { font-size: 48px; line-height: 1.2; font-style: italic; }
+.hero .sub { margin: 22px auto 0; font-size: 18px; color: #5A5248; max-width: 54ch; }
+.hero .ctas { margin-top: 30px; display: flex; gap: 18px; justify-content: center; }
+.btn-primary {
+  display: inline-block; background: #0F5257; color: #F7F2E7; text-decoration: none;
+  padding: 14px 30px; border-radius: 2px; font-weight: 600; font-size: 15px; border: none; cursor: pointer;
+  font-family: 'Work Sans', sans-serif;
+}
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-ghost {
+  display: inline-block; text-decoration: none; padding: 14px 8px; font-weight: 600;
+  font-size: 15px; border-bottom: 1px solid #D4A017; color: #2B2622;
+}
+
+/* ---- Work strip ---- */
+.work-strip { padding: 46px 32px 70px; max-width: 1080px; margin: 0 auto; }
+.work-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.work-card { border-radius: 6px; aspect-ratio: 4/5; position: relative; overflow: hidden; }
+.work-card .fill { position: absolute; inset: 0; }
+.work-card img.fill,
+.work-card video.fill { width: 100%; height: 100%; object-fit: cover; display: block; }
+.work-card picture.fill { display: block; }
+.work-card .cap {
+  position: absolute; bottom: 10px; left: 10px; right: 10px;
+  font-size: 12px; color: #F7F2E7; font-weight: 500;
+}
+.wc1 .fill { background: #0F5257; }
+.wc2 .fill { background: #D4A017; }
+.wc3 .fill { background: #2B2622; }
+.wc4 .fill { background: #C9BDA6; }
+
+/* ---- Services ---- */
+.section-label { text-align: center; font-size: 14px; color: #0F5257; font-weight: 600; margin-bottom: 14px; }
+.services { padding: 30px 32px 80px; max-width: 1080px; margin: 0 auto; }
+.services h2 { text-align: center; font-size: 34px; font-style: italic; margin-bottom: 50px; }
+.service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
+.service-card { border-top: 2px solid #0F5257; padding-top: 18px; }
+.service-card h3 { font-size: 21px; margin-bottom: 10px; }
+.service-card p { font-size: 15px; color: #5A5248; }
+
+/* ---- How we help ---- */
+.help-band { background: #2B2622; color: #F7F2E7; padding: 70px 32px; }
+.help-inner { max-width: 1080px; margin: 0 auto; text-align: center; }
+.help-inner h2 { font-size: 32px; font-style: italic; color: #F7F2E7; margin-bottom: 46px; }
+.help-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; text-align: left; }
+.help-item { border-top: 2px solid #D4A017; padding-top: 16px; }
+.help-item h3 { font-size: 17px; margin-bottom: 10px; color: #F7F2E7; font-family: 'Work Sans', sans-serif; font-weight: 600; }
+.help-item p { font-size: 14px; color: #C9BDA6; line-height: 1.6; }
+
+/* ---- Work strip 2 ---- */
+.work-strip-2 { padding: 70px 0; }
+.work-strip-2 .wrap-head { max-width: 1080px; margin: 0 auto 26px; padding: 0 32px; }
+.work-strip-2 h2 { font-size: 28px; font-style: italic; }
+.scroll-row { display: flex; gap: 14px; overflow-x: auto; padding: 0 32px 8px; }
+.scroll-row .work-card { flex: 0 0 200px; }
+
+/* ---- Inquiry form ---- */
+.inquiry { padding: 80px 32px 100px; max-width: 640px; margin: 0 auto; }
+.inquiry h2 { text-align: center; font-size: 34px; font-style: italic; margin-bottom: 12px; }
+.inquiry .sub { text-align: center; color: #5A5248; font-size: 16px; margin-bottom: 40px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field label { font-size: 13px; font-weight: 600; color: #2B2622; }
+.field input, .field select, .field textarea {
+  font-family: 'Work Sans', sans-serif; font-size: 15px; padding: 12px 14px;
+  border: 1px solid #DCD2BF; border-radius: 4px; background: #FFFDF9; color: #2B2622;
+}
+.field textarea { resize: vertical; min-height: 100px; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: #0F5257;
+}
+.inquiry .btn-primary { width: 100%; padding: 15px; font-size: 16px; margin-top: 6px; }
+.hp-field {
+  position: absolute; left: -9999px; width: 1px; height: 1px;
+  overflow: hidden; opacity: 0; pointer-events: none;
+}
+.form-status { margin-top: 14px; font-size: 14px; text-align: center; display: none; }
+.form-status.success { display: block; color: #0F5257; }
+.form-status.error { display: block; color: #B23A2E; }
+
+footer {
+  text-align: center; padding: 40px 32px 50px; border-top: 1px solid #E4DAC5;
+}
+footer .word { font-family: 'Newsreader', serif; font-style: italic; font-size: 20px; margin-bottom: 10px; }
+footer p { font-size: 13px; color: #8A806E; }
+
+/* ---- FAQ ---- */
+.faq { padding: 70px 32px 90px; max-width: 700px; margin: 0 auto; }
+.faq h2 { text-align: center; font-size: 32px; font-style: italic; margin-bottom: 40px; }
+.faq details { border-top: 1px solid #E4DAC5; padding: 18px 0; }
+.faq details:last-child { border-bottom: 1px solid #E4DAC5; }
+.faq summary {
+  cursor: pointer; font-weight: 600; font-size: 16px; list-style: none;
+  display: flex; justify-content: space-between; align-items: center; gap: 20px;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: '+'; font-size: 20px; color: #0F5257; flex-shrink: 0; }
+.faq details[open] summary::after { content: '\2013'; }
+.faq .answer { margin-top: 12px; color: #5A5248; font-size: 15px; line-height: 1.6; }
+
+@media (max-width: 720px) {
+  .hero h1 { font-size: 34px; }
+  .work-grid { grid-template-columns: repeat(2, 1fr); }
+  .service-grid { grid-template-columns: 1fr; gap: 30px; }
+  .help-inner { grid-template-columns: 1fr; }
+  .help-grid { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+}
