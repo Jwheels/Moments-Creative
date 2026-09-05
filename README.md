@@ -181,8 +181,40 @@ address. Just hit reply.
 - Strips control characters and caps field lengths, so the form can't be used to
   inject mail headers or post a novel.
 - HTML-escapes everything before it goes in the email body.
-- Never leaks the API key or Resend's error text to the visitor — those go to the
-  Function logs instead (Pages project → **Logs**, or `npx wrangler pages deployment tail`).
+- Never leaks the API key. Failures carry a `code` (and, for a Resend rejection,
+  the upstream status and message) so a misconfiguration is visible in DevTools →
+  Network without needing log access. The visitor-facing text stays generic.
+
+### Diagnosing a form that won't send
+
+Open `https://momentscreative.ca/api/inquiry` in a browser. A `GET` returns a
+configuration check:
+
+```json
+{
+  "endpoint": "ok",
+  "resendKeyConfigured": true,
+  "resendKeyLooksValid": true,
+  "resendKeyHasWhitespace": false,
+  "sendsTo": "hello@momentscreative.ca",
+  "sendsFrom": "Moments Creative <inquiries@momentscreative.ca>"
+}
+```
+
+- **404 / the landing page** — the Function isn't deployed. The `functions/`
+  folder didn't ship, or the project is a Worker rather than Pages.
+- **`resendKeyConfigured: false`** — the secret isn't bound. Add it, then
+  redeploy; env vars are read at deploy time.
+- **`resendKeyLooksValid: false`** — that isn't a Resend key (they start `re_`).
+- **`resendKeyHasWhitespace: true`** — a newline came along with the paste.
+
+If all of that looks right, submit the form and read the JSON response in
+DevTools → Network → `inquiry`. `resendStatus` tells you the rest: **401** bad
+key, **403** the `sendsFrom` domain isn't verified in Resend, **422** a payload
+Resend rejected.
+
+The endpoint reports whether a key exists, never its value. Delete
+`onRequestGet` once the form is confirmed working if you'd rather not expose it.
 
 ---
 

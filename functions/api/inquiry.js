@@ -119,6 +119,28 @@ function buildHtml(fields) {
 </html>`;
 }
 
+/**
+ * GET /api/inquiry — configuration check.
+ *
+ * Exists so a misconfiguration can be diagnosed from a browser instead of the
+ * Function logs. It reports whether the key is present, never what it is.
+ * Safe to delete once the form is confirmed working.
+ */
+export async function onRequestGet(context) {
+  const { env } = context;
+  const key = env.RESEND_API_KEY;
+  return json({
+    endpoint: 'ok',
+    resendKeyConfigured: Boolean(key),
+    // Resend keys start with "re_" — catches pasting the wrong value entirely.
+    resendKeyLooksValid: typeof key === 'string' && key.startsWith('re_'),
+    // Catches a stray newline or space picked up while copying.
+    resendKeyHasWhitespace: typeof key === 'string' && key.trim() !== key,
+    sendsTo: env.INQUIRY_TO || DEFAULT_TO,
+    sendsFrom: env.INQUIRY_FROM || DEFAULT_FROM,
+  });
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -127,10 +149,10 @@ export async function onRequestPost(context) {
   try {
     payload = await request.json();
   } catch (_) {
-    return json({ error: 'That submission was malformed. Please try again.' }, 400);
+    return json({ error: 'That submission was malformed. Please try again.', code: 'bad_json' }, 400);
   }
   if (!payload || typeof payload !== 'object') {
-    return json({ error: 'That submission was malformed. Please try again.' }, 400);
+    return json({ error: 'That submission was malformed. Please try again.', code: 'bad_json' }, 400);
   }
 
   // --- Honeypot ----------------------------------------------------------
@@ -151,10 +173,16 @@ export async function onRequestPost(context) {
   };
 
   if (!fields.bizname || !fields.name || !fields.email) {
-    return json({ error: 'Please fill in your business name, your name, and an email.' }, 400);
+    return json({
+      error: 'Please fill in your business name, your name, and an email.',
+      code: 'missing_fields',
+    }, 400);
   }
   if (!isValidEmail(fields.email)) {
-    return json({ error: "That email address doesn't look right — mind checking it?" }, 400);
+    return json({
+      error: "That email address doesn't look right — mind checking it?",
+      code: 'invalid_email',
+    }, 400);
   }
 
   // --- Config ------------------------------------------------------------
@@ -162,7 +190,7 @@ export async function onRequestPost(context) {
   if (!apiKey) {
     // Not the visitor's fault; make it loud in the logs, gentle on the page.
     console.error('RESEND_API_KEY is not set — inquiry not delivered:', fields.email);
-    return json({ error: GENERIC_ERROR }, 500);
+    return json({ error: GENERIC_ERROR, code: 'no_api_key' }, 500);
   }
 
   const to = env.INQUIRY_TO || DEFAULT_TO;
@@ -188,13 +216,21 @@ export async function onRequestPost(context) {
     });
   } catch (err) {
     console.error('Resend request failed:', err);
-    return json({ error: GENERIC_ERROR }, 502);
+    return json({ error: GENERIC_ERROR, code: 'resend_unreachable' }, 502);
   }
 
   if (!resendResponse.ok) {
     const detail = await resendResponse.text().catch(() => '');
     console.error(`Resend returned ${resendResponse.status}: ${detail}`);
-    return json({ error: GENERIC_ERROR }, 502);
+    // resendStatus and detail are Resend's own config feedback ("domain is not
+    // verified", etc.) — diagnostic, and free of anything secret. The API key is
+    // never echoed back by Resend.
+    return json({
+      error: GENERIC_ERROR,
+      code: 'resend_rejected',
+      resendStatus: resendResponse.status,
+      detail: detail.slice(0, 500),
+    }, 502);
   }
 
   return json({ ok: true });
