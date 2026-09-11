@@ -253,39 +253,51 @@ worth asking the designer for — it stays sharp on every screen.
 
 ### Work example photos and video
 
-Every card in both strips is the same shape, marked `<!-- MEDIA SWAP -->` in `public/index.html`:
+Media lives in `public/img/work/` and is placed in three spots, deliberately
+rather than clustered: a four-card grid straight after the hero, a single reel
+breaking up the text-heavy middle, and a full-bleed team photo before the FAQ.
+The old "More from the field" scroll row has been removed.
 
-```html
-<div class="work-card wc1"><div class="fill"></div><div class="cap">Reel · Local boutique</div></div>
+| Slot | File | Shape |
+| --- | --- | --- |
+| Grid card | `merchant-tavern.jpg` etc. | **4:5 portrait**, 900x1125 |
+| Reel | `adelaide-patio-reel.mp4` + `.webm` + `.jpg` poster | **9:16 vertical** |
+| Full-bleed band | `align-chiropractic.jpg` | **2:1 landscape**, 2000x1000 |
+
+**To swap a grid card**, replace the `<img class="fill">` inside its
+`.work-card`. Nothing else changes — the CSS sizes and crops anything with
+`class="fill"`. Export at 4:5; `object-fit: cover` centre-crops anything else,
+which cuts heads off landscape shots.
+
+**Processing originals.** Straight-from-camera files are far too heavy to serve
+(the originals here were 30 MB total, now 1.7 MB). Crop and compress before
+committing — `scripts/` has nothing yet, but Pillow does the job:
+
+```python
+from PIL import Image, ImageOps
+im = ImageOps.exif_transpose(Image.open(src)).convert('RGB')
+# centre-crop to 4:5, resize to 900 wide, save at quality 82
+im.save(out, 'JPEG', quality=82, optimize=True, progressive=True)
 ```
 
-Swap the empty `<div class="fill">` for real media. **Nothing else changes** — the
-CSS already sizes and crops anything with `class="fill"`:
+**Video must be H.264.** Phone footage is often HEVC (H.265), which Chrome and
+Firefox largely refuse to play — it would be a black box for most visitors. The
+reel here was 12.6 MB of HEVC and is now 0.9 MB of H.264:
 
-```html
-<!-- photo -->
-<img class="fill" src="/img/work/boutique.jpg" alt="Reel still — local boutique" loading="lazy">
-
-<!-- video thumbnail that plays on loop -->
-<video class="fill" src="/img/work/pub.mp4" poster="/img/work/pub.jpg" muted loop playsinline></video>
+```sh
+ffmpeg -i input.mp4 -c:v libx264 -profile:v main -pix_fmt yuv420p -crf 28 \
+  -preset slow -vf "scale=720:-2" -an -movflags +faststart out.mp4
+ffmpeg -ss 1.2 -i input.mp4 -frames:v 1 -vf "scale=720:-2" -q:v 3 poster.jpg
 ```
 
-Notes:
-- Cards are **4:5 portrait**. Crop to that ratio before uploading — `object-fit:
-  cover` will centre-crop anything else, which can cut off heads.
-- Export around **800×1000px**. Bigger is wasted; these render ~250px wide.
-- The `wc1`–`wc4` class only sets the placeholder colour. It becomes a no-op once
-  real media covers it — harmless to leave, fine to remove.
-- The caption sits directly on the media in cream text. On a light or busy photo
-  it may need a scrim; add one when you have real images to judge against:
-  ```css
-  .work-card:has(img.fill) .cap,
-  .work-card:has(video.fill) .cap {
-    left: 0; right: 0; bottom: 0;
-    padding: 30px 12px 10px;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.6));
-  }
-  ```
+Audio is stripped deliberately: autoplay only works muted, so it would be dead
+weight. The MP4 is listed before the WebM because nearly every browser plays
+H.264 and the MP4 is the smaller file; the WebM covers builds shipped without
+H.264. `main.js` pauses the reel and shows controls when a visitor has
+`prefers-reduced-motion` set.
+
+**Captions** sit on a dark gradient scrim so cream text stays readable over a
+light photo. Keep the `Format · Client` pattern: `Photo · The Merchant Tavern`.
 
 ### Adding more pages
 

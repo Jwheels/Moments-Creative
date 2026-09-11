@@ -5,6 +5,28 @@
 (function () {
   'use strict';
 
+  // Autoplaying loops are disorienting for anyone who has asked their system to
+  // reduce motion. Honour that: pause, and hand them controls instead.
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function applyMotionPreference() {
+    var videos = document.querySelectorAll('video[data-autoplay]');
+    Array.prototype.forEach.call(videos, function (video) {
+      if (reduce.matches) {
+        video.autoplay = false;
+        video.controls = true;
+        video.pause();
+      } else {
+        video.controls = false;
+        var p = video.play();
+        if (p && p.catch) p.catch(function () { /* blocked by the browser; poster stands in */ });
+      }
+    });
+  }
+
+  applyMotionPreference();
+  if (reduce.addEventListener) reduce.addEventListener('change', applyMotionPreference);
+
   var form = document.getElementById('inquiry-form');
   if (!form) return;
 

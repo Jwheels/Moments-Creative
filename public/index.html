@@ -41,15 +41,28 @@
 
 <div class="work-strip" id="work-1">
   <div class="work-grid">
-    <!-- MEDIA SWAP: each card's placeholder is the empty <div class="fill"></div>.
-         Swap it for real media without touching the layout:
-           <img class="fill" src="/img/work/boutique.jpg" alt="Reel still — local boutique" loading="lazy">
-           <video class="fill" src="/img/work/pub.mp4" poster="/img/work/pub.jpg" muted loop playsinline></video>
-         The .wcN class only sets the placeholder colour; it becomes a no-op behind real media. -->
-    <div class="work-card wc1"><div class="fill"></div><div class="cap">Reel · Local boutique</div></div>
-    <div class="work-card wc2"><div class="fill"></div><div class="cap">Photo series · Hair studio</div></div>
-    <div class="work-card wc3"><div class="fill"></div><div class="cap">TikTok · Neighbourhood pub</div></div>
-    <div class="work-card wc4"><div class="fill"></div><div class="cap">Photo series · Fitness studio</div></div>
+    <!-- MEDIA SWAP: replace the <img class="fill"> to change a card. Cards are 4:5;
+         see README for export sizes. -->
+    <div class="work-card">
+      <img class="fill" src="/img/work/merchant-tavern.jpg" width="900" height="1125"
+           alt="Chef holding a double burger at The Merchant Tavern">
+      <div class="cap">Photo · The Merchant Tavern</div>
+    </div>
+    <div class="work-card">
+      <img class="fill" src="/img/work/bamboo-room.jpg" width="900" height="1125"
+           alt="The Bamboo Room's neon tiki sign and painted door on Water Street">
+      <div class="cap">Photo · The Bamboo Room</div>
+    </div>
+    <div class="work-card">
+      <img class="fill" src="/img/work/adelaide-oyster-house.jpg" width="900" height="1125"
+           alt="Two glasses of beer clinking at Adelaide Oyster House">
+      <div class="cap">Photo · Adelaide Oyster House</div>
+    </div>
+    <div class="work-card">
+      <img class="fill" src="/img/work/grotto.jpg" width="900" height="1125"
+           alt="Sushi being shared with chopsticks at Grotto">
+      <div class="cap">Photo · Grotto</div>
+    </div>
   </div>
 </div>
 
@@ -69,6 +82,21 @@
       <h3>Results tracking</h3>
       <p>We check what's working against real numbers — not just likes — so you know the content is doing more than looking nice.</p>
     </div>
+  </div>
+</div>
+
+<div class="reel-band">
+  <div class="reel-frame">
+    <video class="fill" poster="/img/work/adelaide-patio-reel.jpg"
+           width="720" height="1280"
+           muted loop playsinline autoplay preload="metadata"
+           data-autoplay aria-label="Reel filmed on the patio at Adelaide Oyster House">
+      <!-- MP4 first: nearly every browser plays H.264 and this is the smaller file.
+           WebM covers builds shipped without H.264 (some Linux Chromium builds). -->
+      <source src="/img/work/adelaide-patio-reel.mp4" type="video/mp4">
+      <source src="/img/work/adelaide-patio-reel.webm" type="video/webm">
+    </video>
+    <div class="cap">Reel · Adelaide Oyster House</div>
   </div>
 </div>
 
@@ -92,19 +120,11 @@
   </div>
 </div>
 
-<div class="work-strip-2">
-  <div class="wrap-head">
-    <h2>More from the field</h2>
-  </div>
-  <div class="scroll-row">
-    <!-- MEDIA SWAP: same as the strip above. Card width comes from .scroll-row .work-card in the CSS. -->
-    <div class="work-card wc2"><div class="fill"></div><div class="cap">Reel · Seafood restaurant</div></div>
-    <div class="work-card wc3"><div class="fill"></div><div class="cap">Photo · Coffee shop</div></div>
-    <div class="work-card wc1"><div class="fill"></div><div class="cap">TikTok · Flower shop</div></div>
-    <div class="work-card wc4"><div class="fill"></div><div class="cap">Photo series · Pet groomer</div></div>
-    <div class="work-card wc2"><div class="fill"></div><div class="cap">Reel · Bookstore</div></div>
-  </div>
-</div>
+<figure class="bleed">
+  <img src="/img/work/align-chiropractic.jpg" width="2000" height="1000" loading="lazy"
+       alt="The three-person team at Align Chiropractic &amp; Wellness">
+  <figcaption class="cap">Team photo · Align Chiropractic</figcaption>
+</figure>
 
 <div class="faq">
   <h2>Questions people ask</h2>
