@@ -8,7 +8,7 @@ edge, plus one small Worker script that emails inquiry form submissions to
 ```
 public/                 Everything served to visitors
   index.html              The landing page (markup + copy only)
-  css/styles.css          All styling — the Tide & Table design system
+  css/styles.css          All styling — the "Coastal" design system
   js/main.js              Inquiry form submission handling
   _headers                Security headers
 src/
@@ -31,25 +31,31 @@ stay private.
 > Cloudflare now recommends Workers over Pages for new projects, so the fix was
 > to add a real Worker entry point rather than move back to Pages.
 
-## Design system
+## Design system — "Coastal"
 
-Don't invent new values; reuse these.
+The full brand guide and tokens are in `design_handoff_coastal_rebrand/`
+(`reference/DESIGN_SYSTEM.md`). Reuse these values; don't invent new ones.
 
 | Token | Value | Used for |
 | --- | --- | --- |
-| Cream | `#F7F2E7` | Page background |
-| Charcoal | `#2B2622` | Body text, dark band, placeholder card |
-| Teal | `#0F5257` | Buttons, links, accent rules |
-| Mustard | `#D4A017` | Underlines, accent rules, placeholder card |
-| Warm grey | `#5A5248` | Secondary body copy |
-| Sand | `#C9BDA6` | Muted text on dark, placeholder card |
-| Hairline | `#E4DAC5` | Borders and dividers |
+| Cream | `#FAF6EC` | Page background, text on the slate band |
+| Ink | `#1F2B3A` | Body text, labels, field text, logo letters |
+| Slate | `#2E4A6B` | Buttons, nav pill, links, the "How we'll help you" band |
+| Sun | `#F4D35E` | Logo brackets, ghost-button underline, band rules |
+| Ink-2 | `#4F5B69` | Secondary body copy |
+| Fog | `#C9D3DD` | Body copy on the slate band |
+| Ink-3 | `#7C8794` | Footer line |
+| Hairline | `#E3E1D8` | FAQ and footer rules |
+| Field border / bg | `#D6D6CE` / `#FFFDF7` | Form inputs |
+| Error | `#B23A2E` | Form error text |
 
-Type: **Newsreader** (serif, italic for all headings) and **Work Sans** (UI and
-body), both from Google Fonts. Headings are italic serif — that's the signature of
-the look, so keep it.
+> **Never set sun-yellow text on cream** — it fails contrast. Yellow is only for
+> the logo brackets, rules, underlines and fills.
 
----
+Type: **Outfit** 600 for every heading — upright, never italic, −0.02em
+tracking, 1.15 leading. **Work Sans** 400/500/600 for everything else, including
+the item titles on the slate band (a deliberate swap; those don't take the
+heading tracking). Both load from Google Fonts.
 
 ## Deploying
 
@@ -232,24 +238,15 @@ static assets, routing, `_headers`, and the Worker, exactly as in production.
 
 ### The logo
 
-The wordmark is a text placeholder in two places — the nav and the footer, both
-marked `<!-- LOGO SWAP -->` in `public/index.html`:
+The final logo is `public/img/moments-creative-logo.svg` (ink letters, sun
+brackets, transparent), used in the nav and footer. The favicon is
+`public/img/favicon.svg` (cream "m" on a rounded slate square). Also in
+`public/img/`: `moments-creative-logo-cream.svg` for any future dark-ground
+placement, and `moments-creative-mark-avatar.svg` for social profile pictures.
+Other lockups live in `design_handoff_coastal_rebrand/assets/logo/`.
 
-```html
-<div class="word">Moments Creative</div>
-```
-
-Replace each with an image and add a sizing rule:
-
-```html
-<img class="logo" src="/img/logo.svg" alt="Moments Creative">
-```
-```css
-.logo { height: 28px; width: auto; display: block; }   /* footer: ~26px */
-```
-
-Keep the element in the same spot in the flex row and nothing else moves. SVG is
-worth asking the designer for — it stays sharp on every screen.
+Size the logo by height only (`nav .logo` 62px, 50px on mobile; `footer .logo`
+51px). Never retype it as live text.
 
 ### Work example photos and video
 
