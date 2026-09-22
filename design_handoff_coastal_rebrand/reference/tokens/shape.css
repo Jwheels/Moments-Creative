@@ -1,0 +1,14 @@
+:root{
+--radius-button:2px;
+--radius-field:4px;
+--radius-media:6px;
+
+--border-thin:1px;
+--rule-thick:2px;
+
+--ratio-work-card:4/5; /* @kind other */
+--ratio-reel:9/16; /* @kind other */
+
+--state-disabled-opacity:.6; /* @kind other */
+--focus-border:var(--slate);
+}
