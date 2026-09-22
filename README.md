@@ -301,8 +301,8 @@ H.264 and the MP4 is the smaller file; the WebM covers builds shipped without
 H.264. `main.js` pauses the reel and shows controls when a visitor has
 `prefers-reduced-motion` set.
 
-**Captions** sit on a dark gradient scrim so cream text stays readable over a
-light photo. Keep the `Format · Client` pattern: `Photo · The Merchant Tavern`.
+**Captions** are the client's name alone — no format prefix. They sit on a dark
+gradient scrim so cream text stays readable over a light photo.
 
 ### Adding more pages
 
