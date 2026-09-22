@@ -253,16 +253,21 @@ worth asking the designer for — it stays sharp on every screen.
 
 ### Work example photos and video
 
-Media lives in `public/img/work/` and is placed in three spots, deliberately
-rather than clustered: a four-card grid straight after the hero, a single reel
-breaking up the text-heavy middle, and a full-bleed team photo before the FAQ.
-The old "More from the field" scroll row has been removed.
+Media lives in `public/img/work/` and is placed deliberately rather than
+clustered: a four-card grid straight after the hero, and a single reel breaking
+up the text-heavy middle. The old "More from the field" scroll row is gone.
 
 | Slot | File | Shape |
 | --- | --- | --- |
-| Grid card | `merchant-tavern.jpg` etc. | **4:5 portrait**, 900x1125 |
+| Grid card 1 | `merchant-tavern.jpg` | **4:5 portrait**, 900x1125 |
+| Grid card 2 | `grotto-patio.jpg` | 4:5 |
+| Grid card 3 | `adelaide-oyster-house.jpg` | 4:5 |
+| Grid card 4 | `grotto-sushi.jpg` | 4:5 |
 | Reel | `adelaide-patio-reel.mp4` + `.webm` + `.jpg` poster | **9:16 vertical** |
-| Full-bleed band | `align-chiropractic.jpg` | **2:1 landscape**, 2000x1000 |
+
+> **Put originals somewhere other than `public/`.** Anything in that folder is
+> served to visitors exactly as committed — a 14 MB camera JPEG dropped there
+> is a 14 MB download. Crop and compress first, commit only the result.
 
 **To swap a grid card**, replace the `<img class="fill">` inside its
 `.work-card`. Nothing else changes — the CSS sizes and crops anything with
