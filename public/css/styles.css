@@ -101,7 +101,8 @@ nav .navlink {
 }
 .field textarea { resize: vertical; min-height: 100px; }
 .field input:focus, .field select:focus, .field textarea:focus {
-  outline: none; border-color: #2E4A6B;
+  outline: none; border: 2px solid #F4D35E;
+  padding: 11px 13px; /* 1px less than resting, so the thicker border doesn't nudge the text */
 }
 .inquiry .btn-primary { width: 100%; padding: 15px; font-size: 16px; margin-top: 6px; }
 .hp-field {
