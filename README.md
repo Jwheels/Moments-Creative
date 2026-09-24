@@ -282,6 +282,11 @@ im = ImageOps.exif_transpose(Image.open(src)).convert('RGB')
 im.save(out, 'JPEG', quality=82, optimize=True, progressive=True)
 ```
 
+**New reels:** see `media/README.md`. Originals live in `media/originals/reels/`,
+encoded reels waiting to go live in `media/reels-ready/` (not deployed), and
+`scripts/encode-reel.sh` produces the MP4, WebM and poster with the settings
+below.
+
 **Video must be H.264.** Phone footage is often HEVC (H.265), which Chrome and
 Firefox largely refuse to play — it would be a black box for most visitors. The
 reel here was 12.6 MB of HEVC and is now 0.9 MB of H.264:
