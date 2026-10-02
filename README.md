@@ -240,7 +240,12 @@ static assets, routing, `_headers`, and the Worker, exactly as in production.
 
 The final logo is `public/img/moments-creative-logo.svg` (ink letters, sun
 brackets, transparent), used in the nav and footer. The favicon is
-`public/img/favicon.svg` (cream "m" on a rounded slate square). Also in
+`public/img/favicon.svg` (cream "m" on a rounded slate square), with raster
+versions alongside it: `public/favicon.ico` (16/32/48px — browsers and crawlers
+request this path by default), `public/img/favicon-192.png`, and
+`public/apple-touch-icon.png` (180px, square corners — iOS rounds them itself).
+Google Search doesn't accept SVG favicons, so the raster ones must stay. All are
+rendered from the SVG; regenerate them from it if the mark changes. Also in
 `public/img/`: `moments-creative-logo-cream.svg` for any future dark-ground
 placement, and `moments-creative-mark-avatar.svg` for social profile pictures.
 Other lockups live in `design_handoff_coastal_rebrand/assets/logo/`.
