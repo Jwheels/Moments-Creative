@@ -121,8 +121,6 @@ nav .navlink {
 .post-head span { font-size: 12px; font-weight: 600; color: #1F2B3A; }
 .post-media { aspect-ratio: 4 / 5; background: #1F2B3A; overflow: hidden; }
 .post-media img, .post-media video { width: 100%; height: 100%; object-fit: cover; display: block; }
-.post-cap { margin: 8px 12px 0; font-size: 12px; line-height: 1.45; color: #1F2B3A; }
-.post-cap b { font-weight: 600; }
 
 /* ---- How we help ---- */
 .help-band { background: #2E4A6B; color: #FAF6EC; padding: 70px 32px; }
