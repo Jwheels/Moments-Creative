@@ -73,12 +73,6 @@ nav .navlink {
 .service-card { border-top: 2px solid #2E4A6B; padding-top: 18px; }
 .service-card h3 { font-size: 21px; margin-bottom: 10px; letter-spacing: -0.01em; }
 .service-card p { font-size: 15px; color: #4F5B69; }
-.services-note {
-  margin-top: 50px; padding: 22px 0 0; border-top: 1px solid #E3E1D8;
-  text-align: center; font-size: 16px; color: #4F5B69; text-wrap: balance;
-}
-.services-note-more { margin-top: 10px; padding-top: 0; border-top: none; }
-.services-note strong { font-weight: 600; color: #1F2B3A; }
 
 /* ---- In the feed ---- */
 .feed-band {
