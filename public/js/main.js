@@ -29,35 +29,60 @@
   applyMotionPreference();
   if (reduce.addEventListener) reduce.addEventListener('change', applyMotionPreference);
 
-  // Scroll-linked media. The filmstrip slides sideways and the phone's feed slides
-  // up as each passes through the viewport, tied directly to scroll position (no
-  // timers, no easing). Without this script, or with reduced motion on, both stay
-  // as plain rows the visitor scrolls by hand — that is the CSS default.
+  // Scroll-linked media.
+  //
+  // Filmstrip: on a desktop it slides sideways as the page scrolls. On phones and
+  // tablets it stays a row you swipe. A script can only follow a touch scroll after
+  // the fact, so a scroll-linked strip stutters there, and it ran through most of
+  // its photos before the strip was properly on screen.
+  //
+  // Phone feed: it holds on the first post (the reel) until the phone is fully in
+  // view, so there is time to watch it, then scrolls through the rest as the page
+  // moves on. Where the browser supports scroll-driven animations the browser runs
+  // this itself, off the main thread, so it is smooth on phones too (styles.css,
+  // "feed-scroll"). Otherwise a desktop falls back to the script below, and a
+  // phone just shows the reel.
+  //
+  // With reduced motion on, nothing is linked: both are scrolled by hand.
   var strip = document.querySelector('.filmstrip');
   var track = strip && strip.querySelector('.film-track');
   var phone = document.getElementById('phone');
   var feedView = phone && phone.querySelector('.phone-viewport');
   var feed = phone && phone.querySelector('.phone-feed');
-  var linked = false;
+  var desktop = window.matchMedia('(hover: hover) and (pointer: fine) and (min-width: 721px)');
+  var cssTimeline = !!(window.CSS && CSS.supports && CSS.supports('animation-timeline: view()'));
+  var stripLinked = false;
+  var phoneMode = 'manual'; // 'css' | 'js' | 'still' | 'manual'
   var frame = 0;
 
   function clamp(v) { return Math.min(1, Math.max(0, v)); }
 
+  function feedMax() {
+    return Math.max(0, feed.scrollHeight - feedView.clientHeight);
+  }
+
   function updateLinked() {
     frame = 0;
-    if (!linked) return;
     var vh = window.innerHeight;
-    if (strip && track) {
+    if (stripLinked && strip && track) {
       var r = strip.getBoundingClientRect();
       var p = clamp((vh - r.top) / (vh + r.height));
       var max = Math.max(0, track.scrollWidth - strip.clientWidth);
       track.style.transform = 'translate3d(' + (-max * p).toFixed(1) + 'px,0,0)';
     }
     if (phone && feed && feedView) {
-      var pr = phone.getBoundingClientRect();
-      var pp = clamp((vh * 0.85 - pr.top) / (vh * 0.85 + pr.height * 0.3));
-      var pmax = Math.max(0, feed.scrollHeight - feedView.clientHeight);
-      feed.style.transform = 'translate3d(0,' + (-pmax * pp).toFixed(1) + 'px,0)';
+      if (phoneMode === 'css') {
+        // The browser animates it; it only needs to know how far the feed can travel.
+        phone.style.setProperty('--feed-max', feedMax() + 'px');
+      } else if (phoneMode === 'js') {
+        // Same timing as the CSS version: start once the phone is fully in view,
+        // finish when 60% of it has scrolled off the top.
+        var pr = phone.getBoundingClientRect();
+        var start = Math.max(vh - pr.height, 0);
+        var end = -pr.height * 0.6;
+        var pp = clamp((start - pr.top) / (start - end));
+        feed.style.transform = 'translate3d(0,' + (-feedMax() * pp).toFixed(1) + 'px,0)';
+      }
     }
   }
 
@@ -66,15 +91,20 @@
   }
 
   function applyLinking() {
-    linked = !reduce.matches;
-    if (strip) { strip.classList.toggle('is-linked', linked); strip.scrollLeft = 0; }
-    if (phone) { phone.classList.toggle('is-linked', linked); if (feedView) feedView.scrollTop = 0; }
-    if (linked) {
-      updateLinked();
-    } else {
-      if (track) track.style.transform = '';
-      if (feed) feed.style.transform = '';
+    stripLinked = !reduce.matches && desktop.matches;
+    phoneMode = reduce.matches ? 'manual' : cssTimeline ? 'css' : desktop.matches ? 'js' : 'still';
+    if (strip) {
+      strip.classList.toggle('is-linked', stripLinked);
+      if (stripLinked) strip.scrollLeft = 0;
+      else if (track) track.style.transform = '';
     }
+    if (phone) {
+      phone.classList.toggle('is-linked', phoneMode !== 'manual');
+      phone.classList.toggle('is-css', phoneMode === 'css');
+      if (feedView && phoneMode !== 'manual') feedView.scrollTop = 0;
+      if (feed && phoneMode !== 'js') feed.style.transform = '';
+    }
+    updateLinked();
   }
 
   if (strip || phone) {
@@ -85,6 +115,7 @@
     // everything has loaded.
     window.addEventListener('load', requestUpdate);
     if (reduce.addEventListener) reduce.addEventListener('change', applyLinking);
+    if (desktop.addEventListener) desktop.addEventListener('change', applyLinking);
   }
 
   var form = document.getElementById('inquiry-form');
