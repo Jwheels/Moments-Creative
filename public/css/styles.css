@@ -39,9 +39,14 @@ nav .navlink {
 
 /* ---- Filmstrip ---- */
 /* An edge-to-edge row that ignores the 1080px page width on purpose. By default it
-   is a swipeable, snapping row; main.js adds .is-linked and slides the track with
-   the page scroll instead (never under prefers-reduced-motion). */
-.filmstrip { padding: 46px 0 70px; overflow-x: auto; scroll-snap-type: x mandatory; }
+   is a swipeable, snapping row, and that is what phones and tablets get. On a
+   desktop main.js adds .is-linked and slides the track with the page scroll
+   instead (never under prefers-reduced-motion). */
+.filmstrip {
+  padding: 46px 0 70px; overflow-x: auto; scroll-snap-type: x mandatory;
+  scroll-padding-left: 32px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.filmstrip::-webkit-scrollbar { display: none; }
 .filmstrip.is-linked { overflow-x: hidden; scroll-snap-type: none; }
 .film-track { display: flex; gap: 14px; padding: 0 32px; width: max-content; will-change: transform; }
 .film-frame {
@@ -102,6 +107,20 @@ nav .navlink {
 .phone-viewport { position: absolute; inset: 44px 0 0; overflow-y: auto; }
 .phone.is-linked .phone-viewport { overflow: hidden; }
 .phone-feed { will-change: transform; }
+/* Scroll-driven feed, run by the browser where it can (main.js adds .is-css and
+   measures --feed-max). It holds on the first post until the phone is fully in
+   view, then scrolls the rest until 60% of the phone has left the top. */
+.phone { view-timeline: --phone block; }
+@keyframes feed-scroll {
+  to { transform: translate3d(0, calc(-1 * var(--feed-max, 0px)), 0); }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .phone.is-css .phone-feed {
+    animation: feed-scroll linear both;
+    animation-timeline: --phone;
+    animation-range: entry 100% exit 60%;
+  }
+}
 .post { margin-bottom: 14px; }
 .post-head { display: flex; align-items: center; gap: 8px; padding: 0 12px 8px; }
 .post-head img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; display: block; }
