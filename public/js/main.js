@@ -1,6 +1,8 @@
-/* Moments Creative — inquiry form submission.
-   Posts to the Cloudflare Pages Function at /api/inquiry, which emails
-   the submission to hello@momentscreative.ca. */
+/* Moments Creative — page behaviour.
+   1. Honours reduced motion for the autoplaying reel.
+   2. Links the filmstrip and the phone feed to the page scroll.
+   3. Posts the inquiry form to /api/inquiry, which emails the submission
+      to hello@momentscreative.ca. */
 
 (function () {
   'use strict';
@@ -26,6 +28,64 @@
 
   applyMotionPreference();
   if (reduce.addEventListener) reduce.addEventListener('change', applyMotionPreference);
+
+  // Scroll-linked media. The filmstrip slides sideways and the phone's feed slides
+  // up as each passes through the viewport, tied directly to scroll position (no
+  // timers, no easing). Without this script, or with reduced motion on, both stay
+  // as plain rows the visitor scrolls by hand — that is the CSS default.
+  var strip = document.querySelector('.filmstrip');
+  var track = strip && strip.querySelector('.film-track');
+  var phone = document.getElementById('phone');
+  var feedView = phone && phone.querySelector('.phone-viewport');
+  var feed = phone && phone.querySelector('.phone-feed');
+  var linked = false;
+  var frame = 0;
+
+  function clamp(v) { return Math.min(1, Math.max(0, v)); }
+
+  function updateLinked() {
+    frame = 0;
+    if (!linked) return;
+    var vh = window.innerHeight;
+    if (strip && track) {
+      var r = strip.getBoundingClientRect();
+      var p = clamp((vh - r.top) / (vh + r.height));
+      var max = Math.max(0, track.scrollWidth - strip.clientWidth);
+      track.style.transform = 'translate3d(' + (-max * p).toFixed(1) + 'px,0,0)';
+    }
+    if (phone && feed && feedView) {
+      var pr = phone.getBoundingClientRect();
+      var pp = clamp((vh * 0.85 - pr.top) / (vh * 0.85 + pr.height * 0.3));
+      var pmax = Math.max(0, feed.scrollHeight - feedView.clientHeight);
+      feed.style.transform = 'translate3d(0,' + (-pmax * pp).toFixed(1) + 'px,0)';
+    }
+  }
+
+  function requestUpdate() {
+    if (!frame) frame = requestAnimationFrame(updateLinked);
+  }
+
+  function applyLinking() {
+    linked = !reduce.matches;
+    if (strip) { strip.classList.toggle('is-linked', linked); strip.scrollLeft = 0; }
+    if (phone) { phone.classList.toggle('is-linked', linked); if (feedView) feedView.scrollTop = 0; }
+    if (linked) {
+      updateLinked();
+    } else {
+      if (track) track.style.transform = '';
+      if (feed) feed.style.transform = '';
+    }
+  }
+
+  if (strip || phone) {
+    applyLinking();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+    // Image heights are reserved by CSS, but the feed's length is only final once
+    // everything has loaded.
+    window.addEventListener('load', requestUpdate);
+    if (reduce.addEventListener) reduce.addEventListener('change', applyLinking);
+  }
 
   var form = document.getElementById('inquiry-form');
   if (!form) return;
@@ -66,7 +126,7 @@
       }
 
       if (res.ok) {
-        setStatus('success', "Thanks — we'll be in touch soon.");
+        setStatus('success', "Thanks. We'll be in touch soon.");
         form.reset();
       } else {
         // Show the server's own wording when it gave us some (e.g. "That email

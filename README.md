@@ -255,26 +255,37 @@ Size the logo by height only (`nav .logo` 62px, 50px on mobile; `footer .logo`
 
 ### Work example photos and video
 
-Media lives in `public/img/work/` and is placed deliberately rather than
-clustered: a four-card grid straight after the hero, and a single reel breaking
-up the text-heavy middle. The old "More from the field" scroll row is gone.
+Media lives in `public/img/work/` and shows up in two places, with no photo used
+in both:
 
-| Slot | File | Shape |
+- **The filmstrip** straight after the hero: an edge-to-edge row that slides
+  sideways as the page scrolls.
+- **The phone feed** beside "Where your customers actually see it": client posts
+  inside a plain phone, scrolling as the page scrolls. Its first post is the reel.
+
+| Where | File | Shape |
 | --- | --- | --- |
-| Grid card 1 | `merchant-tavern.jpg` | **4:5 portrait**, 900x1125 |
-| Grid card 2 | `grotto-patio.jpg` | 4:5 |
-| Grid card 3 | `adelaide-oyster-house.jpg` | 4:5 |
-| Grid card 4 | `grotto-sushi.jpg` | 4:5 |
-| Reel | `adelaide-patio-reel.mp4` + `.webm` + `.jpg` poster | **9:16 vertical** |
+| Filmstrip | `cocktail.jpg` | 9:16 |
+| Filmstrip | `spritz.jpg`, `adelaide-sandwich.jpg`, `crab-spread.jpg`, `merchant-tavern-guests.jpg`, `brioche.jpg`, `chef-jarritos.jpg` | 2:3, 1000x1500 |
+| Filmstrip | `grotto-patio.jpg` | **4:5 portrait**, 900x1125 |
+| Phone feed | `adelaide-patio-reel.mp4` + `.webm` + `.jpg` poster | 9:16 vertical, shown cropped to 4:5 |
+| Phone feed | `grotto-sushi.jpg`, `merchant-tavern.jpg`, `adelaide-oyster-house.jpg` | 4:5, 900x1125 |
 
 > **Put originals somewhere other than `public/`.** Anything in that folder is
 > served to visitors exactly as committed — a 14 MB camera JPEG dropped there
 > is a 14 MB download. Crop and compress first, commit only the result.
 
-**To swap a grid card**, replace the `<img class="fill">` inside its
-`.work-card`. Nothing else changes — the CSS sizes and crops anything with
-`class="fill"`. Export at 4:5; `object-fit: cover` centre-crops anything else,
-which cuts heads off landscape shots.
+**To change the filmstrip**, add, remove or reorder the `<figure class="film-frame">`
+blocks in `public/index.html`. A frame is 4:5 unless it has `r-2-3` or `r-9-16`;
+every frame shares one height, so mixed shapes are fine. The `<figcaption>` is the
+client name only, and optional. Six to ten frames reads best.
+
+**To change the phone feed**, edit the `.post` blocks. Each needs the client name
+(it is the account name) and a 4:5 image; `object-fit: cover` centre-crops anything
+else. Keep it platform-neutral: no hearts, counts or app logos.
+
+Both move with the page scroll through `public/js/main.js`. With JavaScript off or
+reduced motion on, they are plain rows the visitor scrolls by hand.
 
 **Processing originals.** Straight-from-camera files are far too heavy to serve
 (the originals here were 30 MB total, now 1.7 MB). Crop and compress before
