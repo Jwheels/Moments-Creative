@@ -37,15 +37,21 @@ nav .navlink {
   font-size: 15px; border-bottom: 1px solid #F4D35E; color: #1F2B3A;
 }
 
-/* ---- Work strip ---- */
-.work-strip { padding: 46px 32px 70px; max-width: 1080px; margin: 0 auto; }
-.work-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.work-card { border-radius: 6px; aspect-ratio: 4/5; position: relative; overflow: hidden; }
-.work-card .fill { position: absolute; inset: 0; }
-.work-card img.fill,
-.work-card video.fill { width: 100%; height: 100%; object-fit: cover; display: block; }
-.work-card picture.fill { display: block; }
-.work-card .cap, .reel-frame .cap {
+/* ---- Filmstrip ---- */
+/* An edge-to-edge row that ignores the 1080px page width on purpose. By default it
+   is a swipeable, snapping row; main.js adds .is-linked and slides the track with
+   the page scroll instead (never under prefers-reduced-motion). */
+.filmstrip { padding: 46px 0 70px; overflow-x: auto; scroll-snap-type: x mandatory; }
+.filmstrip.is-linked { overflow-x: hidden; scroll-snap-type: none; }
+.film-track { display: flex; gap: 14px; padding: 0 32px; width: max-content; will-change: transform; }
+.film-frame {
+  position: relative; flex-shrink: 0; height: 440px; aspect-ratio: 4 / 5; margin: 0;
+  border-radius: 6px; overflow: hidden; background: #2E4A6B; scroll-snap-align: start;
+}
+.film-frame.r-2-3 { aspect-ratio: 2 / 3; }
+.film-frame.r-9-16 { aspect-ratio: 9 / 16; }
+.film-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.film-frame .cap, .reel-frame .cap {
   position: absolute; left: 0; right: 0; bottom: 0;
   padding: 34px 12px 11px;
   font-size: 12px; color: #FAF6EC; font-weight: 500;
@@ -53,10 +59,6 @@ nav .navlink {
      is unreadable over a light frame (the Grotto shot, for one). */
   background: linear-gradient(transparent, rgba(0, 0, 0, 0.68));
 }
-.wc1 .fill { background: #2E4A6B; }
-.wc2 .fill { background: #F4D35E; }
-.wc3 .fill { background: #1F2B3A; }
-.wc4 .fill { background: #C9D3DD; }
 
 /* ---- Services ---- */
 .section-label { text-align: center; font-size: 14px; color: #2E4A6B; font-weight: 600; margin-bottom: 14px; }
@@ -66,6 +68,47 @@ nav .navlink {
 .service-card { border-top: 2px solid #2E4A6B; padding-top: 18px; }
 .service-card h3 { font-size: 21px; margin-bottom: 10px; letter-spacing: -0.01em; }
 .service-card p { font-size: 15px; color: #4F5B69; }
+.services-note {
+  margin-top: 50px; padding: 22px 0 0; border-top: 1px solid #E3E1D8;
+  text-align: center; font-size: 16px; color: #4F5B69; text-wrap: balance;
+}
+.services-note strong { font-weight: 600; color: #1F2B3A; }
+
+/* ---- In the feed ---- */
+.feed-band {
+  padding: 30px 32px 100px; max-width: 1080px; margin: 0 auto;
+  display: flex; flex-wrap: wrap; gap: 60px; align-items: center; justify-content: center;
+}
+.feed-copy { flex: 1 1 320px; min-width: 0; }
+.feed-copy .section-label { text-align: left; }
+.feed-copy h2 { font-size: 34px; line-height: 1.15; }
+.feed-copy p { margin-top: 18px; font-size: 16px; color: #4F5B69; max-width: 42ch; }
+.feed-phone { flex: 1 1 300px; min-width: 0; }
+/* A generic phone, not any real handset. The feed scrolls by hand by default;
+   main.js adds .is-linked and moves it with the page scroll instead. */
+.phone {
+  width: 300px; max-width: 100%; aspect-ratio: 9 / 19; margin: 0 auto;
+  background: #1F2B3A; border-radius: 45px; padding: 10px;
+}
+.phone-screen {
+  position: relative; width: 100%; height: 100%;
+  background: #FFFDF7; border-radius: 35px; overflow: hidden;
+}
+.phone-notch {
+  position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+  width: 34%; height: 22px; border-radius: 11px; background: #1F2B3A; z-index: 2;
+}
+.phone-viewport { position: absolute; inset: 44px 0 0; overflow-y: auto; }
+.phone.is-linked .phone-viewport { overflow: hidden; }
+.phone-feed { will-change: transform; }
+.post { margin-bottom: 14px; }
+.post-head { display: flex; align-items: center; gap: 8px; padding: 0 12px 8px; }
+.post-head img { width: 26px; height: 26px; border-radius: 50%; object-fit: cover; display: block; }
+.post-head span { font-size: 12px; font-weight: 600; color: #1F2B3A; }
+.post-media { aspect-ratio: 4 / 5; background: #1F2B3A; overflow: hidden; }
+.post-media img, .post-media video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.post-cap { margin: 8px 12px 0; font-size: 12px; line-height: 1.45; color: #1F2B3A; }
+.post-cap b { font-weight: 600; }
 
 /* ---- How we help ---- */
 .help-band { background: #2E4A6B; color: #FAF6EC; padding: 70px 32px; }
@@ -76,10 +119,16 @@ nav .navlink {
 .help-item h3 { font-size: 17px; margin-bottom: 10px; color: #FAF6EC; font-family: 'Work Sans', sans-serif; font-weight: 600;
   letter-spacing: normal; /* the -0.02em heading tracking belongs to Outfit; these stay Work Sans */ }
 .help-item p { font-size: 14px; color: #C9D3DD; line-height: 1.6; }
+/* The primary button inverted for the slate band: slate on slate would vanish. */
+.btn-light {
+  display: inline-block; margin-top: 46px; background: #FAF6EC; color: #2E4A6B;
+  text-decoration: none; padding: 14px 30px; border-radius: 2px; font-weight: 600; font-size: 15px;
+}
 
 /* ---- Reel ---- */
-/* A single vertical reel, centred, breaking up the text-heavy middle of the
-   page with motion. Sized so it reads as a phone-shaped moment, not a banner. */
+/* A single vertical reel, centred. Not on the page right now (the live reel plays
+   inside the phone feed), but kept so a reel from media/reels-ready/ can be dropped
+   in with the markup in media/README.md. */
 .reel-band { padding: 64px 32px 78px; }
 .reel-frame {
   position: relative; width: 320px; max-width: 100%; margin: 0 auto;
@@ -142,7 +191,9 @@ footer p { font-size: 13px; color: #7C8794; }
   nav .logo { height: 50px; }
   .reel-band { padding: 54px 32px 62px; }
   .reel-frame { width: 260px; }
-  .work-grid { grid-template-columns: repeat(2, 1fr); }
+  .film-frame { height: 320px; }
+  .feed-band { gap: 40px; padding-bottom: 70px; }
+  .feed-copy h2 { font-size: 28px; }
   .service-grid { grid-template-columns: 1fr; gap: 30px; }
   .help-inner { grid-template-columns: 1fr; }
   .help-grid { grid-template-columns: 1fr; }
