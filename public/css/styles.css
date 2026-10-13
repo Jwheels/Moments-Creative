@@ -43,11 +43,32 @@ nav .navlink {
    desktop main.js adds .is-linked and slides the track with the page scroll
    instead (never under prefers-reduced-motion). */
 .filmstrip {
-  padding: 46px 0 70px; overflow-x: auto; scroll-snap-type: x mandatory;
+  /* Bottom spacing is a margin so a visible scrollbar sits under the photos. */
+  padding: 46px 0 0; margin-bottom: 70px; overflow-x: auto; scroll-snap-type: x mandatory;
   scroll-padding-left: 32px; scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
 .filmstrip::-webkit-scrollbar { display: none; }
 .filmstrip.is-linked { overflow-x: hidden; scroll-snap-type: none; }
+/* With a mouse and no sliding (reduced motion on), the row needs a visible way to
+   move: a slim slate scrollbar, and main.js lets the visitor drag it. */
+@media (hover: hover) and (pointer: fine) {
+  .filmstrip:not(.is-linked) {
+    scrollbar-width: thin; scrollbar-color: #2E4A6B #E3E1D8;
+    cursor: grab; user-select: none;
+  }
+  .filmstrip:not(.is-linked) .film-track { padding-bottom: 14px; }
+  .filmstrip.is-dragging { cursor: grabbing; scroll-snap-type: none; }
+}
+.film-frame img { -webkit-user-drag: none; }
+/* "Swipe →" (or "Drag →" with a mouse) under the strip whenever it isn't sliding on
+   its own, so visitors know there is more. main.js sets the word and hides the
+   hint once the strip has been moved. */
+.film-hint {
+  display: none; margin: -56px 0 42px; padding: 0 32px;
+  font-size: 13px; font-weight: 600; color: #2E4A6B;
+}
+.filmstrip:not(.is-linked) + .film-hint { display: block; }
+.film-hint.is-done { visibility: hidden; }
 .film-track { display: flex; gap: 14px; padding: 0 32px; width: max-content; will-change: transform; }
 .film-frame {
   position: relative; flex-shrink: 0; height: 440px; aspect-ratio: 4 / 5; margin: 0;
@@ -98,7 +119,12 @@ nav .navlink {
   position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
   width: 34%; height: 22px; border-radius: 11px; background: #1F2B3A; z-index: 2;
 }
-.phone-viewport { position: absolute; inset: 44px 0 0; overflow-y: auto; }
+.phone-viewport {
+  position: absolute; inset: 44px 0 0; overflow-y: auto;
+  /* A real phone feed shows no scrollbar; it still scrolls by wheel or finger. */
+  scrollbar-width: none;
+}
+.phone-viewport::-webkit-scrollbar { display: none; }
 .phone.is-linked .phone-viewport { overflow: hidden; }
 .phone-feed { will-change: transform; }
 /* Scroll-driven feed, run by the browser where it can (main.js adds .is-css and
