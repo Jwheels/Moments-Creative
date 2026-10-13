@@ -118,6 +118,38 @@
     if (desktop.addEventListener) desktop.addEventListener('change', applyLinking);
   }
 
+  // When the filmstrip is not sliding with the page (reduced motion on), a mouse
+  // can drag it sideways. Touch devices swipe it natively, so only the mouse is
+  // handled here.
+  if (strip) {
+    var hint = document.querySelector('.film-hint');
+    if (hint) {
+      var mouse = window.matchMedia('(hover: hover) and (pointer: fine)');
+      hint.textContent = (mouse.matches ? 'Drag' : 'Swipe') + ' \u2192';
+      strip.addEventListener('scroll', function () {
+        if (strip.scrollLeft > 40) hint.classList.add('is-done');
+      }, { passive: true });
+    }
+    var drag = null;
+    strip.addEventListener('pointerdown', function (e) {
+      if (stripLinked || e.pointerType !== 'mouse' || e.button !== 0) return;
+      drag = { x: e.clientX, left: strip.scrollLeft, id: e.pointerId };
+      strip.classList.add('is-dragging');
+      strip.setPointerCapture(e.pointerId);
+    });
+    strip.addEventListener('pointermove', function (e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      strip.scrollLeft = drag.left - (e.clientX - drag.x);
+    });
+    function endDrag(e) {
+      if (!drag || e.pointerId !== drag.id) return;
+      drag = null;
+      strip.classList.remove('is-dragging');
+    }
+    strip.addEventListener('pointerup', endDrag);
+    strip.addEventListener('pointercancel', endDrag);
+  }
+
   var form = document.getElementById('inquiry-form');
   if (!form) return;
 
